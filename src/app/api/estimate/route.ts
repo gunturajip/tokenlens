@@ -48,17 +48,39 @@ export async function POST(req: Request) {
 
     const data = await response.json();
 
+    console.log('MiniMax Response:', JSON.stringify(data, null, 2));
+
     if (!response.ok) {
       console.error('MiniMax API Error:', data);
-      return NextResponse.json({ error: 'Failed to estimate tokens' }, { status: 500 });
+      return NextResponse.json({ error: data.message || 'Failed to estimate tokens' }, { status: 500 });
     }
 
-    const responseText = data.choices?.[0]?.message?.content || '';
+    let responseText = data.choices?.[0]?.message?.content || '';
+
+    if (!responseText) {
+      console.error('Empty response from MiniMax');
+      return NextResponse.json({
+        estimated_output_tokens: 500,
+        output_token_range: { min: 300, max: 800 },
+        complexity: "medium",
+        reasoning: "Default estimation due to empty API response.",
+        recommended_model_tier: "mid-range",
+        multimodal_notes: null
+      });
+    }
+
+    if (typeof responseText === 'object' && responseText.text) {
+      responseText = responseText.text;
+    }
+
     const result = JSON.parse(responseText);
 
     return NextResponse.json(result);
   } catch (error) {
     console.error('Estimation API Error:', error);
-    return NextResponse.json({ error: 'Failed to estimate tokens' }, { status: 500 });
+    return NextResponse.json({
+      error: 'Failed to estimate tokens',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }
