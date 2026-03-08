@@ -20,76 +20,71 @@ Respond ONLY with valid JSON in this exact format:
   "multimodal_notes": "notes if images/files present, else null" 
  }`;
 
+function getDefaultEstimation() {
+  return {
+    estimated_output_tokens: 500,
+    output_token_range: { min: 300, max: 800 },
+    complexity: "medium",
+    reasoning: "Default estimation due to API error.",
+    recommended_model_tier: "mid-range",
+    multimodal_notes: null
+  };
+}
+
 export async function POST(req: Request) {
   try {
     const { content } = await req.json();
 
     if (!process.env.MINIMAX_API_KEY) {
-      return NextResponse.json({
-        estimated_output_tokens: 500,
-        output_token_range: { min: 300, max: 800 },
-        complexity: "medium",
-        reasoning: "Mock estimation because MINIMAX_API_KEY is not set.",
-        recommended_model_tier: "mid-range",
-        multimodal_notes: null
-      });
+      return NextResponse.json(getDefaultEstimation());
     }
 
-    const message = await anthropic.messages.create({
-      model: 'MiniMax-M2.5',
-      max_tokens: 1000,
-      system: ESTIMATION_SYSTEM_PROMPT,
-      messages: [
-        {
-          role: 'user',
-          content: `Estimate output for this content: ${content.substring(0, 50000)}`
-        }
-      ],
-    });
+    let message;
+    try {
+      message = await anthropic.messages.create({
+        model: 'MiniMax-M2.5',
+        max_tokens: 1000,
+        system: ESTIMATION_SYSTEM_PROMPT,
+        messages: [
+          {
+            role: 'user',
+            content: `Estimate output for this content: ${content.substring(0, 50000)}`
+          }
+        ],
+      });
+    } catch (apiError) {
+      console.error('MiniMax API call failed:', apiError);
+      return NextResponse.json(getDefaultEstimation());
+    }
 
     console.log('MiniMax Response:', JSON.stringify(message, null, 2));
 
     let responseText = '';
 
-    for (const block of message.content) {
-      if (block.type === 'text') {
-        responseText = block.text;
-        break;
+    if (message.content && Array.isArray(message.content)) {
+      for (const block of message.content) {
+        if (block.type === 'text') {
+          responseText = block.text || '';
+          break;
+        }
       }
     }
 
     if (!responseText) {
-      return NextResponse.json({
-        estimated_output_tokens: 500,
-        output_token_range: { min: 300, max: 800 },
-        complexity: "medium",
-        reasoning: "Default estimation due to empty API response.",
-        recommended_model_tier: "mid-range",
-        multimodal_notes: null
-      });
+      console.error('Empty response text from MiniMax');
+      return NextResponse.json(getDefaultEstimation());
     }
 
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       console.error('No JSON found in response:', responseText);
-      return NextResponse.json({
-        estimated_output_tokens: 500,
-        output_token_range: { min: 300, max: 800 },
-        complexity: "medium",
-        reasoning: "Default estimation - could not parse JSON from response.",
-        recommended_model_tier: "mid-range",
-        multimodal_notes: null
-      });
+      return NextResponse.json(getDefaultEstimation());
     }
 
     const result = JSON.parse(jsonMatch[0]);
-
     return NextResponse.json(result);
   } catch (error) {
     console.error('Estimation API Error:', error);
-    return NextResponse.json({
-      error: 'Failed to estimate tokens',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return NextResponse.json(getDefaultEstimation());
   }
 }
