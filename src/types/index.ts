@@ -57,4 +57,11 @@ export interface EstimationResult {
   reasoning: string;
   recommended_model_tier: 'budget' | 'mid-range' | 'premium';
   multimodal_notes: string | null;
+  totalCost: number;
+  inputTokens: number;
+  outputTokens: number;
+  breakdown: {
+    inputCost: number;
+    outputCost: number;
+  };
 }

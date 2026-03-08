@@ -20,7 +20,6 @@ const Tabs = React.forwardRef<
                     return React.cloneElement(child as React.ReactElement<{
                         value?: string
                         onValueChange?: (value: string) => void
-                        value?: string
                     }>, {
                         value: currentValue,
                         onValueChange: handleValueChange,

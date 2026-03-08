@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/client';
 import { NextResponse } from 'next/server';
 
-const supabase = createClient();
-
 export async function GET() {
+  const supabase = createClient();
+
   try {
     const { data, error } = await supabase
       .from('llm_models')
