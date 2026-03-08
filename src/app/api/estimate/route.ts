@@ -1,4 +1,9 @@
+import Anthropic from '@anthropic-ai/sdk';
 import { NextResponse } from 'next/server';
+
+const anthropic = new Anthropic({
+  apiKey: process.env.MINIMAX_API_KEY || '',
+});
 
 const ESTIMATION_SYSTEM_PROMPT = `You are a token estimation expert for AI models. 
 Given input content (text, extracted file text, or image descriptions), 
@@ -30,32 +35,25 @@ export async function POST(req: Request) {
       });
     }
 
-    const response = await fetch('https://api.minimax.chat/v1/text/chatcompletion_v2', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.MINIMAX_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'MiniMax-M2.5',
-        messages: [
-          { role: 'system', content: ESTIMATION_SYSTEM_PROMPT },
-          { role: 'user', content: `Estimate output for this content: ${content.substring(0, 50000)}` }
-        ],
-        temperature: 0.3,
-      }),
+    const message = await anthropic.messages.create({
+      model: 'MiniMax-M2.5',
+      max_tokens: 1000,
+      system: ESTIMATION_SYSTEM_PROMPT,
+      messages: [
+        {
+          role: 'user',
+          content: `Estimate output for this content: ${content.substring(0, 50000)}`
+        }
+      ],
     });
 
-    const data = await response.json();
-
-    console.log('MiniMax Response:', JSON.stringify(data, null, 2));
-
-    if (!response.ok) {
-      console.error('MiniMax API Error:', data);
-      return NextResponse.json({ error: data.message || 'Failed to estimate tokens' }, { status: 500 });
+    let responseText = '';
+    for (const block of message.content) {
+      if (block.type === 'text') {
+        responseText = block.text;
+        break;
+      }
     }
-
-    let responseText = data.choices?.[0]?.message?.content || '';
 
     if (!responseText) {
       console.error('Empty response from MiniMax');
@@ -67,10 +65,6 @@ export async function POST(req: Request) {
         recommended_model_tier: "mid-range",
         multimodal_notes: null
       });
-    }
-
-    if (typeof responseText === 'object' && responseText.text) {
-      responseText = responseText.text;
     }
 
     const result = JSON.parse(responseText);
