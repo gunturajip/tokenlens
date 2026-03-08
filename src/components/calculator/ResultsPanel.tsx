@@ -5,20 +5,20 @@ import { useCalculatorStore } from "@/stores/calculatorStore";
 import { calculateCost } from "@/lib/costCalculator";
 import { countTokens } from "@/lib/tokenizer";
 import { CostBreakdown } from "@/types";
-import { 
-  TrendingUp, TrendingDown, DollarSign, Brain, BarChart4, 
-  ArrowRight, Sparkles, CheckCircle, Info, Loader2 
+import {
+  TrendingUp, TrendingDown, DollarSign, Brain, BarChart4,
+  ArrowRight, Sparkles, CheckCircle, Info, Loader2
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Card, CardContent, CardHeader, CardTitle, CardDescription 
+import {
+  Card, CardContent, CardHeader, CardTitle, CardDescription
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
 export function ResultsPanel() {
-  const { 
-    inputText, images, files, selectedModel, 
-    estimation, setEstimation, isLoading, setLoading 
+  const {
+    inputText, images, files, selectedModel,
+    estimation, setEstimation, isLoading, setLoading
   } = useCalculatorStore();
 
   const handleEstimate = async () => {
@@ -39,13 +39,13 @@ export function ResultsPanel() {
     }
   };
 
-  const inputTokens = countTokens(inputText) + 
-    images.reduce((acc, img) => acc + img.tokens, 0) + 
+  const inputTokens = countTokens(inputText) +
+    images.reduce((acc, img) => acc + img.tokens, 0) +
     files.reduce((acc, f) => acc + f.tokens, 0);
 
   const outputTokens = estimation?.estimated_output_tokens || 0;
-  
-  const cost: CostBreakdown | null = selectedModel 
+
+  const cost: CostBreakdown | null = selectedModel
     ? calculateCost(inputTokens, outputTokens, selectedModel)
     : null;
 
@@ -55,7 +55,7 @@ export function ResultsPanel() {
     <div className="space-y-6">
       <Card className="border-border bg-card shadow-xl relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full -mr-16 -mt-16 blur-3xl transition-all group-hover:scale-110" />
-        
+
         <CardHeader className="pb-4">
           <div className="flex justify-between items-start">
             <div className="space-y-1">
@@ -68,7 +68,7 @@ export function ResultsPanel() {
               </CardDescription>
             </div>
             {!estimation && (
-              <button 
+              <button
                 onClick={handleEstimate}
                 disabled={isLoading}
                 className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-lg shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-50"
@@ -124,12 +124,11 @@ export function ResultsPanel() {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-xs text-muted-foreground font-medium">Complexity</span>
-                    <Badge variant="outline" className={`text-[10px] font-bold px-2 py-0 border-none ${
-                      estimation.complexity === 'low' ? 'bg-emerald-500/10 text-emerald-500' :
-                      estimation.complexity === 'medium' ? 'bg-amber-500/10 text-amber-500' :
-                      estimation.complexity === 'high' ? 'bg-orange-500/10 text-orange-500' :
-                      'bg-rose-500/10 text-rose-500'
-                    }`}>
+                    <Badge variant="outline" className={`text-[10px] font-bold px-2 py-0 border-none ${estimation.complexity === 'low' ? 'bg-emerald-500/10 text-emerald-500' :
+                        estimation.complexity === 'medium' ? 'bg-amber-500/10 text-amber-500' :
+                          estimation.complexity === 'high' ? 'bg-orange-500/10 text-orange-500' :
+                            'bg-rose-500/10 text-rose-500'
+                      }`}>
                       {estimation.complexity.toUpperCase()}
                     </Badge>
                   </div>
