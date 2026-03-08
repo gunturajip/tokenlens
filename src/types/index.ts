@@ -38,7 +38,6 @@ export interface UserProfile {
   display_name?: string;
   plan: 'free' | 'pro' | 'enterprise';
   calculations_used: number;
-  auth_provider?: string;
   created_at: string;
 }
 
