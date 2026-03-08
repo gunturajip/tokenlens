@@ -38,10 +38,11 @@ create table if not exists calculations (
 -- 3. Create user_profiles table
 create table if not exists user_profiles (
   id uuid primary key references auth.users(id) on delete cascade,
+  email text,
   display_name text,
-  plan text default 'free',        -- 'free' | 'pro' | 'enterprise'
-  calculations_used integer default 0,
-  created_at timestamptz default now()
+  avatar_url text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
 );
 
 -- Enable RLS
