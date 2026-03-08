@@ -47,9 +47,10 @@ export async function POST(req: Request) {
       ],
     });
 
-    console.log('MiniMax Response blocks:', JSON.stringify(message.content, null, 2));
+    console.log('MiniMax Response:', JSON.stringify(message, null, 2));
 
     let responseText = '';
+
     for (const block of message.content) {
       if (block.type === 'text') {
         responseText = block.text;
@@ -58,7 +59,6 @@ export async function POST(req: Request) {
     }
 
     if (!responseText) {
-      console.error('Empty response from MiniMax, blocks:', message.content);
       return NextResponse.json({
         estimated_output_tokens: 500,
         output_token_range: { min: 300, max: 800 },
@@ -69,10 +69,20 @@ export async function POST(req: Request) {
       });
     }
 
-    const cleanText = responseText.replace(/^<think>[\s\S]*?<\/think>\s*/g, '').trim();
-    console.log('Response text after cleaning:', cleanText);
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      console.error('No JSON found in response:', responseText);
+      return NextResponse.json({
+        estimated_output_tokens: 500,
+        output_token_range: { min: 300, max: 800 },
+        complexity: "medium",
+        reasoning: "Default estimation - could not parse JSON from response.",
+        recommended_model_tier: "mid-range",
+        multimodal_notes: null
+      });
+    }
 
-    const result = JSON.parse(cleanText);
+    const result = JSON.parse(jsonMatch[0]);
 
     return NextResponse.json(result);
   } catch (error) {
