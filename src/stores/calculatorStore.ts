@@ -9,6 +9,7 @@ interface CalculatorState {
     allModels: LLMModel[];
     estimation: EstimationResult | null;
     isLoading: boolean;
+    isSaving: boolean;
 
     // Actions
     setInputText: (text: string) => void;
@@ -21,9 +22,10 @@ interface CalculatorState {
     setEstimation: (estimation: EstimationResult) => void;
     setLoading: (loading: boolean) => void;
     clearAll: () => void;
+    saveCalculation: (requestsPerDay?: number) => Promise<boolean>;
 }
 
-export const useCalculatorStore = create<CalculatorState>((set) => ({
+export const useCalculatorStore = create<CalculatorState>((set, get) => ({
     inputText: '',
     images: [],
     files: [],
@@ -31,6 +33,7 @@ export const useCalculatorStore = create<CalculatorState>((set) => ({
     allModels: [],
     estimation: null,
     isLoading: false,
+    isSaving: false,
 
     setInputText: (text) => set({ inputText: text }),
 
@@ -65,4 +68,47 @@ export const useCalculatorStore = create<CalculatorState>((set) => ({
         estimation: null,
         isLoading: false
     }),
+
+    saveCalculation: async (requestsPerDay = 1) => {
+        const state = get();
+        const { selectedModel, estimation } = state;
+        
+        if (!selectedModel || !estimation) {
+            return false;
+        }
+
+        set({ isSaving: true });
+
+        try {
+            const dailyCost = estimation.totalCost * requestsPerDay;
+            const monthlyCost = dailyCost * 30;
+
+            const response = await fetch('/api/calculations', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    model_id: selectedModel.model_id,
+                    model_name: selectedModel.name,
+                    provider: selectedModel.provider,
+                    input_tokens: estimation.inputTokens,
+                    output_tokens: estimation.outputTokens,
+                    requests_per_day: requestsPerDay,
+                    input_cost: estimation.breakdown.inputCost,
+                    output_cost: estimation.breakdown.outputCost,
+                    total_cost: estimation.totalCost,
+                    daily_cost: dailyCost,
+                    monthly_cost: monthlyCost,
+                }),
+            });
+
+            set({ isSaving: false });
+            return response.ok;
+        } catch (error) {
+            console.error('Failed to save calculation:', error);
+            set({ isSaving: false });
+            return false;
+        }
+    },
 }));
