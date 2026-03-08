@@ -47,6 +47,8 @@ export async function POST(req: Request) {
       ],
     });
 
+    console.log('MiniMax Response blocks:', JSON.stringify(message.content, null, 2));
+
     let responseText = '';
     for (const block of message.content) {
       if (block.type === 'text') {
@@ -56,7 +58,7 @@ export async function POST(req: Request) {
     }
 
     if (!responseText) {
-      console.error('Empty response from MiniMax');
+      console.error('Empty response from MiniMax, blocks:', message.content);
       return NextResponse.json({
         estimated_output_tokens: 500,
         output_token_range: { min: 300, max: 800 },
@@ -67,7 +69,10 @@ export async function POST(req: Request) {
       });
     }
 
-    const result = JSON.parse(responseText);
+    const cleanText = responseText.replace(/^<think>[\s\S]*?<\/think>\s*/g, '').trim();
+    console.log('Response text after cleaning:', cleanText);
+
+    const result = JSON.parse(cleanText);
 
     return NextResponse.json(result);
   } catch (error) {
