@@ -1,5 +1,5 @@
 {
-  "name": "ai-token-cost-simulator",
+  "name": "tokenlens",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,9 +9,28 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
+    "@hookform/resolvers": "^5.2.2",
+    "@stripe/stripe-js": "^8.9.0",
+    "@supabase/auth-helpers-nextjs": "^0.15.0",
+    "@supabase/supabase-js": "^2.98.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "csv-parse": "^6.1.0",
+    "framer-motion": "^12.35.1",
+    "js-tiktoken": "^1.0.21",
+    "lucide-react": "^0.577.0",
+    "mammoth": "^1.11.0",
     "next": "16.1.6",
+    "pdf-parse": "^2.4.5",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-hook-form": "^7.71.2",
+    "recharts": "^3.8.0",
+    "stripe": "^20.4.1",
+    "tailwind-merge": "^3.5.0",
+    "zod": "^4.3.6",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

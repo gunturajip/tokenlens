@@ -1,26 +1,72 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  
+  --color-background: #0A0A0A;
+  --color-foreground: #F9FAFB;
+  
+  --color-card: #111111;
+  --color-card-foreground: #F9FAFB;
+  
+  --color-popover: #111111;
+  --color-popover-foreground: #F9FAFB;
+  
+  --color-primary: #3B82F6;
+  --color-primary-foreground: #FFFFFF;
+  
+  --color-secondary: #8B5CF6;
+  --color-secondary-foreground: #FFFFFF;
+  
+  --color-muted: #1F2937;
+  --color-muted-foreground: #9CA3AF;
+  
+  --color-accent: #1F2937;
+  --color-accent-foreground: #F9FAFB;
+  
+  --color-destructive: #EF4444;
+  --color-destructive-foreground: #FFFFFF;
+  
+  --color-border: #1F2937;
+  --color-input: #1F2937;
+  --color-ring: #3B82F6;
+  
+  --radius-lg: 0.75rem;
+  --radius-md: 0.5rem;
+  --radius-sm: 0.25rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #1f2937;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #374151;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
